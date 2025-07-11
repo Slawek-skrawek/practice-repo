@@ -9,7 +9,7 @@ ser = serial.Serial(SERIAL_PORT, SERIAL_RATE)
 
 # Path containing the Mynewt project
 PROJECTS_DIR = "~/work/myproj"
-board_type = "nordic_pca10040"
+board_type = "nordic_pca10090"
 app_name = "blinky"
 target_name = f"{board_type}-{app_name}"
 
@@ -27,11 +27,11 @@ def main():
     run_cmd(f"cd {PROJECTS_DIR}")
     print(f"Loading target: {target_name}")
     success, output = run_cmd(f"newt load {target_name}", check=False)
-    print(output)
+    print("Output: " + output)
     if not success:
         print(f" Load failed for {target_name}:\n{output}")
         return
-
+    print(f"End of load: {target_name}")
 
 if __name__ == "__main__":
     main()
