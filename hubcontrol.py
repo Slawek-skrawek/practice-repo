@@ -29,11 +29,11 @@ def parse_arguments():
         metavar="PORT")
     parser.add_argument(
         '-u', '--power-up',
-        help="Power on selected port (1-8)",
+        help="Power on selected port (1-8) or all ports (a)",
         metavar="PORT")
     parser.add_argument(
         '-g', '--get-state',
-        help="Get state of selected port (1-8)",
+        help="Get state of selected port (1-8) or all ports (a)",
         metavar="PORT")
     parser.add_argument(
         '-i','--input',
