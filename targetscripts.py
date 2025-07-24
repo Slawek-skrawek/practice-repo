@@ -1,55 +1,44 @@
-# import os
-import subprocess
-import traceback
+import command
 
 # Path containing the Mynewt project
-PROJECTS_DIR = "~/work/myproj"
+# PROJECTS_DIR = "~/work/myproj"
+# BSP_DIR_PATH = "/home/slawek/work/myproj/repos/apache-mynewt-core/hw/bsp/"
 # Path containing the Mynewt bsp directories
 BSP_DIR = "@apache-mynewt-core/hw/bsp/"
-BSP_DIR_PATH = "/home/slawek/work/myproj/repos/apache-mynewt-core/hw/bsp/"
 BOOT_BUILD_PROFILE = "optimized"
 BUILD_PROFILE = "debug"
-
-def run_cmd(cmd, check=True):
-    """Runs a shell command and returns (success, output)."""
-    try:
-        result = subprocess.run(cmd, shell=True, check=check, capture_output=True, text=True)
-        return True, result.stdout
-    except subprocess.CalledProcessError as e:
-        traceback.print_exc()
-        return False, e.stderr
 
 def create_target_name(board_name, app_name):
     return board_name + "-" + app_name
 
 def target_exists(name):
-    success, _ = run_cmd(f"newt target show {name}", check=False)
+    success, _ = command.run_cmd(f"newt target show {name}", check=False)
     return success
 
 def create_target(target_name):
     if not target_exists(target_name):
         print(f"Creating target: {target_name}")
-        run_cmd(f"newt target create {target_name}")
+        command.run_cmd(f"newt target create {target_name}")
     else:
         print(f"Target {target_name} already exists.")
 
 def set_target(target_name, board_name, app_name):
     if app_name == "boot":
-        success, output = run_cmd(f"newt target set {target_name} app=@mcuboot/boot/mynewt")
+        success, output = command.run_cmd(f"newt target set {target_name} app=@mcuboot/boot/mynewt")
     else:
-        success, output = run_cmd(f"newt target set {target_name} app=apps/{app_name}")
+        success, output = command.run_cmd(f"newt target set {target_name} app=apps/{app_name}")
     print(output)
-    success, output = run_cmd(f"newt target set {target_name} bsp={BSP_DIR}{board_name}")
+    success, output = command.run_cmd(f"newt target set {target_name} bsp={BSP_DIR}{board_name}")
     print(output)
     if app_name == "boot":
-        success, output = run_cmd(f"newt target set {target_name} build_profile={BOOT_BUILD_PROFILE}")
+        success, output = command.run_cmd(f"newt target set {target_name} build_profile={BOOT_BUILD_PROFILE}")
     else:
-        success, output = run_cmd(f"newt target set {target_name} build_profile={BUILD_PROFILE}")
+        success, output = command.run_cmd(f"newt target set {target_name} build_profile={BUILD_PROFILE}")
     print(output)
 
 def build_target(target_name):
     print(f" Building target: {target_name}")
-    success, output = run_cmd(f"newt build {target_name}", check=False)
+    success, output = command.run_cmd(f"newt build {target_name}", check=False)
     print(output)
     if not success:
         # print(output)
@@ -58,7 +47,7 @@ def build_target(target_name):
 
 def create_image(target_name):
     print(f" Creating image for target: {target_name}")
-    success, output = run_cmd(f"newt create-image {target_name} timestamp", check=False)
+    success, output = command.run_cmd(f"newt create-image {target_name} timestamp", check=False)
     print(output)
     if not success:
         # print(output)
@@ -67,7 +56,7 @@ def create_image(target_name):
 
 def load_image(target_name):
     print(f" Loading target: {target_name}")
-    success, output = run_cmd(f"newt load {target_name}", check=False)
+    success, output = command.run_cmd(f"newt load {target_name}", check=False)
     print(output)
     if not success:
         print(output)
@@ -85,7 +74,7 @@ def full_create_target(target_name, board_name, app_name):
 
 
 def main():
-            run_cmd(f"cd {PROJECTS_DIR}")
+            # command.run_cmd(f"cd {PROJECTS_DIR}")
     #for entry in os.scandir(BSP_DIR):
         #if entry.is_dir():
             board_name = "nordic_pca10090" #pic32mx470_6lp_clicker

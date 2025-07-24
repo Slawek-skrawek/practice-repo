@@ -1,18 +1,35 @@
 import argparse
 import os
-import serial
 import targetscripts
-# import subprocess
-# import loadimages
+# import command as cmd
 
-SERIAL_PORT = '/dev/ttyACM0'
-SERIAL_RATE = 115200
-ser = serial.Serial(SERIAL_PORT, SERIAL_RATE)
+PROJECTS_DIR = "~/work/myproj"
+BSP_DIR_PATH = "/home/slawek/work/myproj/repos/apache-mynewt-core/hw/bsp/"
 
-parser = argparse.ArgumentParser(description="Choose board, app and command to be performed")
-parser.add_argument("board_name", help="Name of the board or all_boards")
-parser.add_argument("app_name", help="Name of the application")
-parser.add_argument("command", help="Command to be performed on the target")
+parser = argparse.ArgumentParser(
+    description="Choose board, app and command to be performed",
+    formatter_class=argparse.RawTextHelpFormatter)
+parser.add_argument(
+    "board",
+    nargs="+",
+    help="Name of the board [boards] or 'all_boards' keyword")
+parser.add_argument(
+    "app_name",
+    help="Name of the application")
+parser.add_argument(
+    "command",
+    help="Command to be performed on the target. List of commands:\n"
+         " full_create  - creates, sets, builds target and creates image\n"
+         " create       - creates target, if it does not exist\n"
+         " set          - sets targets app, bsp and debug profile\n"
+         " build        - builds target\n"
+         " create_image - creates image of the built target\n"
+         " load         - loads targets image on the device\n")
+parser.add_argument(
+    "-f", "--file",
+    action="store_true",
+    help="interpret board as a file to load boards from instead",
+)
 args = parser.parse_args()
 
 def perform_command(target_name, board_name, app_name, command):
@@ -32,14 +49,18 @@ def perform_command(target_name, board_name, app_name, command):
         print("Unknown command")
 
 def main():
-    board_name = args.board_name
+    board_list = args.board
+    board_name = board_list[0]
     app_name = args.app_name
     command = args.command
 
-    # targetscripts.run_cmd(f"cd {targetscripts.PROJECTS_DIR}")
+    if args.file:
+        board_list = []
+        with open(board_name, "r") as f:
+            board_list = f.read().split()
 
     if board_name == "all_boards":
-        for entry in os.scandir(targetscripts.BSP_DIR_PATH):
+        for entry in os.scandir(BSP_DIR_PATH):
             if entry.is_dir():
                 board_name = entry.name
                 print(f"\nProcessing target board: {board_name}")
@@ -48,25 +69,14 @@ def main():
                 print(f"Done with {board_name}")
                 print("-" * 40)
     else:
-        print(f"\nProcessing target board: {board_name}")
-        target_name = targetscripts.create_target_name(board_name, app_name)
-        print(board_name, app_name, command, target_name)
-        perform_command(target_name, board_name, app_name, command)
-        print(f"Done with {board_name}")
+        for board_name in board_list:
+            print(f"\nProcessing target board: {board_name}")
+            target_name = targetscripts.create_target_name(board_name, app_name)
+            print(f"Board name: {board_name}\nApp name: {app_name}\n"
+                  f"Command name: {command}\nTarget name: {target_name}")
+            perform_command(target_name, board_name, app_name, command)
+            print(f"Done with {board_name}")
 
-    # if command == "create":
-    #     targetscripts.create_target(target_name)
-    # elif command == "set":
-    #     targetscripts.set_target(target_name, board_name, app_name)
-    # elif command == "build":
-    #     targetscripts.build_target(target_name)
-    # elif command == "create_image":
-    #     targetscripts.create_image(target_name)
-    # elif command == "load":
-    #     targetscripts.load_image(target_name)
-    # else:
-    #     print("Unknown command")
-    # return 0
 
 if __name__ == "__main__":
     main()
