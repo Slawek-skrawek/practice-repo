@@ -1,0 +1,28 @@
+{
+  "Port": {
+    "1": {
+      "Serial_number": "OSHW000032254e4500428003ab98000d84d1000097969900",
+      "Name": "reel_board"
+    },
+    "2": {
+      "Serial_number": "000960054645",
+      "Name": "nordic_pca10090"
+    },
+    "3": {
+      "Serial_number": "000960066795",
+      "Name": "nordic_pca10090"
+    },
+    "5": {
+      "Serial_number": "0666FF495157808667171335",
+      "Name": "nucleo-f767zi"
+    },
+    "6": {
+      "Serial_number": "000683403725",
+      "Name": "nordic_pca10056"
+    },
+    "7": {
+      "Serial_number": "0015002D4741500720383733",
+      "Name": "nucleo-u575zi-q"
+    }
+  }
+}
