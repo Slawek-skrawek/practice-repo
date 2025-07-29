@@ -2,33 +2,38 @@ import command
 import usb
 import time
 import json
+import sys
 
 NUM_PORTS = 7
-PORT_DELAY = 2
+PORT_DELAY = 2.5
 
-def load_device_map(filename="/home/slawek/work/python/mynewt_tests/jsons/device_list.json"):
+def load_device_list(filename = "/home/slawek/work/python/mynewt_tests/jsons/device_list.json"):
     try:
         with open(filename, "r") as f:
             return json.load(f)
     except FileNotFoundError:
         return {}
 
-def identify_device(serial_number, device_map):
+def identify_device(serial_number, device_map,
+                    unknown_devices_file = "/home/slawek/work/python/mynewt_tests/jsons/unknown_devices"):
     device_name = device_map.get(serial_number, {"name": "unknown_device"})
     if device_name["name"] == "unknown_device":
-        filename = "/home/slawek/work/python/mynewt_tests/jsons/unknown_devices"
         try:
-            with open(filename, "a") as f:
+            with open(unknown_devices_file, "a") as f:
                 print(f"Unknown serial number: {serial_number}", file=f)
         except FileNotFoundError:
             pass
     return device_name
 
-def enable_port(port):
-    command.run_cmd([f"python3 /home/slawek/work/python/mynewt_tests/hubcontrol.py -u {str(port)}"], check=True)
+def enable_port(port, hub_serial = "", hubcontrol_path = "/home/slawek/work/python/mynewt_tests/"):
+    if hub_serial != "":
+        hub_serial = "-s " + hub_serial
+    command.run_cmd([f"python3 {hubcontrol_path}hubcontrol.py {hub_serial} -u {str(port)}"], check=True)
 
-def disable_port(port):
-    command.run_cmd([f"python3 /home/slawek/work/python/mynewt_tests/hubcontrol.py -d {str(port)}", ], check=True)
+def disable_port(port, hub_serial = "", hubcontrol_path = "/home/slawek/work/python/mynewt_tests/"):
+    if hub_serial != "":
+        hub_serial = "-s " + hub_serial
+    command.run_cmd([f"python3 {hubcontrol_path}hubcontrol.py {hub_serial} -d {str(port)}"], check=True)
 
 def snapshot_devices():
     snapshot = {}
@@ -49,11 +54,11 @@ def detect_new_device(before, after):
     # Return any serial number(s) present in after but not in before
     return {s: after[s] for s in after if s not in before}
 
-def probe_port(port):
+def probe_port(port, hub_serial = ""):
     print(f"\nProbing port {port}")
     before = snapshot_devices()
 
-    enable_port(port)
+    enable_port(port, hub_serial)
     time.sleep(PORT_DELAY)
     after = snapshot_devices()
 
@@ -68,32 +73,43 @@ def probe_port(port):
             print(f"  Product ID  : {info['product_id']}")
             print(f"  Manufacturer: {info['manufacturer']}")
             print(f"  Product     : {info['product']}")
-    disable_port(port)
+    disable_port(port, hub_serial)
     return new_devices
 
-def map_ports():
-    disable_port("a")
-    device_map = load_device_map()
+def map_ports(hub_serial = ""):
+    disable_port("a", hub_serial)
+    device_map = load_device_list()
 
     results = {}
     for port in range(1, NUM_PORTS + 1):
-        new_dev = probe_port(port)
+        new_dev = probe_port(port, hub_serial)
         if new_dev:
             results[port] = new_dev
 
     print("\n--- Port Mapping Result ---")
-    end_result = {}
+    ports_list = []
     for port, devs in results.items():
         for serial, info in devs.items():
             identified_device = identify_device(serial, device_map)
             name = identified_device["name"]
-            end_result[port] = {'Serial_number': serial,'Name': name}
+            ports_list.append({
+                'Port': port,
+                'Serial_number': serial,
+                'Name': name
+            })
             print(f"Port {port}: {serial} - {name}")
-    return {"Port": end_result}
+    return {
+        "Hub serial": hub_serial,
+        "Ports": ports_list
+    }
 
-def main():
-    device_map = map_ports()
-    with open("/home/slawek/work/python/mynewt_tests/jsons/device_map.json", "w") as f:
+def main(device_map_location = "/home/slawek/work/python/mynewt_tests/jsons/"):
+    if sys.argv[1:]:
+        hub_serial = sys.argv[1]
+    else:
+        hub_serial = ""
+    device_map = map_ports(hub_serial)
+    with open(f"{device_map_location}device_map.json", "w") as f:
         json.dump(device_map, f, indent=2)
 
 if __name__ == "__main__":
