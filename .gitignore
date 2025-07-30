@@ -1,3 +1,4 @@
 .idea/
 __pycache__
 jsons/device_map.json
+jsons/watchdog_test*.json

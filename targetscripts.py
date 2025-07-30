@@ -22,45 +22,51 @@ def create_target(target_name):
     else:
         print(f"Target {target_name} already exists.")
 
-def set_target(target_name, board_name, app_name):
+def set_target(target_name, board_name, app_name, print_output=False):
     if app_name == "boot":
         success, output = command.run_cmd(f"newt target set {target_name} app=@mcuboot/boot/mynewt")
     else:
         success, output = command.run_cmd(f"newt target set {target_name} app=apps/{app_name}")
-    print(output)
+    if print_output:
+        print(output)
     success, output = command.run_cmd(f"newt target set {target_name} bsp={BSP_DIR}{board_name}")
-    print(output)
+    if print_output:
+        print(output)
     if app_name == "boot":
         success, output = command.run_cmd(f"newt target set {target_name} build_profile={BOOT_BUILD_PROFILE}")
     else:
         success, output = command.run_cmd(f"newt target set {target_name} build_profile={BUILD_PROFILE}")
-    print(output)
+    if print_output:
+        print(output)
 
-def build_target(target_name):
-    print(f" Building target: {target_name}")
+def build_target(target_name, print_output=False):
+    print(f"Building target: {target_name}")
     success, output = command.run_cmd(f"newt build {target_name}", check=False)
-    print(output)
-    if not success:
-        # print(output)
-        print(f" Build failed for {target_name}:\n{output}")
-        return
-
-def create_image(target_name):
-    print(f" Creating image for target: {target_name}")
-    success, output = command.run_cmd(f"newt create-image {target_name} timestamp", check=False)
-    print(output)
-    if not success:
-        # print(output)
-        print(f" Image creation failed for {target_name}:\n{output}")
-        return
-
-def load_image(target_name):
-    print(f" Loading target: {target_name}")
-    success, output = command.run_cmd(f"newt load {target_name}", check=False)
-    print(output)
+    if print_output:
+        print(output)
     if not success:
         print(output)
-        print(f" Load failed for {target_name}:\n{output}")
+        print(f"Build failed for {target_name}:\n{output}")
+        return
+
+def create_image(target_name, print_output=False):
+    print(f"Creating image for target: {target_name}")
+    success, output = command.run_cmd(f"newt create-image {target_name} timestamp", check=False)
+    if print_output:
+        print(output)
+    if not success:
+        # print(output)
+        print(f"Image creation failed for {target_name}:\n{output}")
+        return
+
+def load_image(target_name, print_output=False):
+    print(f" Loading target: {target_name}")
+    success, output = command.run_cmd(f"newt load {target_name}", check=False)
+    if print_output:
+        print(output)
+    if not success:
+        print(output)
+        print(f"Load failed for {target_name}:\n{output}")
         return
 
 def full_create_target(target_name, board_name, app_name):

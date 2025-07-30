@@ -1,8 +1,9 @@
-import command
 import usb
 import time
 import json
 import sys
+
+import hubcontrol
 
 NUM_PORTS = 7
 PORT_DELAY = 2.5
@@ -25,15 +26,11 @@ def identify_device(serial_number, device_map,
             pass
     return device_name
 
-def enable_port(port, hub_serial = "", hubcontrol_path = "/home/slawek/work/python/mynewt_tests/"):
-    if hub_serial != "":
-        hub_serial = "-s " + hub_serial
-    command.run_cmd([f"python3 {hubcontrol_path}hubcontrol.py {hub_serial} -u {str(port)}"], check=True)
+def enable_port(port, hub_serial = ""):
+    hubcontrol.set_power(True, port, hub_serial)
 
-def disable_port(port, hub_serial = "", hubcontrol_path = "/home/slawek/work/python/mynewt_tests/"):
-    if hub_serial != "":
-        hub_serial = "-s " + hub_serial
-    command.run_cmd([f"python3 {hubcontrol_path}hubcontrol.py {hub_serial} -d {str(port)}"], check=True)
+def disable_port(port, hub_serial = ""):
+    hubcontrol.set_power(False, port, hub_serial)
 
 def snapshot_devices():
     snapshot = {}

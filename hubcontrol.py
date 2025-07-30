@@ -10,7 +10,17 @@ class CustomParser(argparse.ArgumentParser):
 VENDOR_ID = 0xc0ca
 PRODUCT_ID = 0xc001
 
-def parse_arguments():
+def set_power(state, port, serial=""):
+    state = ("-u" if state else "-d")
+    if type(port) is int:
+        port = str(port)
+    if serial != "":
+        args = [state, port, '-s', serial]
+    else:
+        args = [state, port]
+    parse_arguments(args)
+
+def parse_arguments(args=None):
     parser = CustomParser(
         description="Control power state of individual ports on a selected USB hub",
         formatter_class=argparse.RawTextHelpFormatter)
@@ -43,7 +53,7 @@ def parse_arguments():
              " - p s      - set port p (1-8) to state s ON (1), OFF (0)",
         metavar="INPUT")
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     arguments = vars(args).copy()
     arguments.pop('serial_number')
