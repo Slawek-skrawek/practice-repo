@@ -60,8 +60,8 @@ def create_image(target_name, print_output=False):
         return
 
 def load_image(target_name, print_output=False):
-    print(f" Loading target: {target_name}")
-    success, output = command.run_cmd(f"newt load {target_name}", check=False)
+    print(f"Loading target: {target_name}")
+    success, output = command.run_cmd(f"newt load {target_name}", check=print_output)
     if print_output:
         print(output)
     if not success:
